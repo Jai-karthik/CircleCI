@@ -6,25 +6,18 @@ orbs:
   welcome: circleci/welcome-orb@0.4.1
 # Orchestrate or schedule a set of jobs
 jobs:
-  print_hello:
+  create_infrastructure:
     docker:
-      - image : circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
-      - run : echo hello
-
-  print_world:
-    docker:
-      - image : circleci/node:13.8.0
-    steps:
-      - run : echo world
-
+      - checkout
+      - run:
+          name: Ensure backend infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file template.yml \
+              --stack-name my-stack
 workflows:
-  # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
+  my_workflow:
     jobs:
-      - welcome/run
-      - print_hello
-      - print_world:
-          requires:
-            - print_hello
+      - create_infrastructure
